@@ -139,15 +139,6 @@ if [ -f /etc/init.d/machine-id ]; then
     sed -i 's/need root dev/need root/' /etc/init.d/machine-id
 fi
 
-# Fix inittab:
-# 1. Remove useless tty1-6 (no VTs in a container)
-# 2. Add console getty for the Droidspaces foreground console
-# 3. Add console to securetty so root login is allowed
-sed -i '/^tty[1-6]::/d' /etc/inittab
-grep -q 'console::respawn' /etc/inittab || \
-    echo 'console::respawn:/sbin/getty 38400 console' >> /etc/inittab
-grep -q '^console$' /etc/securetty || echo 'console' >> /etc/securetty
-
 # Artix does not normally have _apt, but preserve compatibility if it is added.
 if grep -q '^_apt:' /etc/passwd; then
     usermod -g aid_inet _apt
