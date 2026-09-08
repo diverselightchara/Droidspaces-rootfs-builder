@@ -193,7 +193,28 @@ stop() {
 EOT
 chmod 0755 /etc/init.d/droidspaces-network
 
+# Fix /dev/null permissions for container use
+cat > /etc/init.d/droidspaces-devfix <<'EOT'
+#!/sbin/openrc-run
+
+description="Fix /dev/null permissions for container use"
+
+depend() {
+    before *
+    after devfs
+}
+
+start() {
+    ebegin "Fixing /dev/null permissions"
+    chmod 666 /dev/null
+    chown root:root /dev/null
+    eend $?
+}
+EOT
+chmod 0755 /etc/init.d/droidspaces-devfix
+
 # OpenRC service enablement.
+rc-update add droidspaces-devfix sysinit
 rc-update add udev sysinit
 rc-update del udev-trigger sysinit 2>/dev/null || true
 rc-update add droidspaces-udev-trigger sysinit
