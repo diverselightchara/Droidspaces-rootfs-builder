@@ -111,6 +111,14 @@ grep -q '^aid_net_admin:' /etc/group || echo 'aid_net_admin:x:3005:' >> /etc/gro
 # Permit root to access Android networking and exposed hardware devices.
 usermod -a -G aid_inet,aid_net_raw,input,video,tty root || true
 
+# Tell OpenRC it's in an LXC-style container (same as Alpine)
+sed -i 's/^#\?rc_sys=.*/rc_sys="lxc"/' /etc/rc.conf
+
+# Remove "dev" dependency from machine-id if it exists
+if [ -f /etc/init.d/machine-id ]; then
+    sed -i 's/need root dev/need root/' /etc/init.d/machine-id
+fi
+
 # Artix does not normally have _apt, but preserve compatibility if it is added.
 if grep -q '^_apt:' /etc/passwd; then
     usermod -g aid_inet _apt
